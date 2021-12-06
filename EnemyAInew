@@ -1,0 +1,44 @@
+using UnityEngine;
+
+public class EnemyAI : MonoBehaviour
+{
+    [SerializeField] GameObject Player;
+
+    [Header("Enemy")]
+    [SerializeField] Rigidbody2D rb;
+    [SerializeField] GameObject enemyGO;
+    [SerializeField] float jumpForce;
+    [SerializeField] float FollowDistance;
+
+    public float EnemySpeed = 4f;
+    float enemyDistance;
+
+    void FixedUpdate()
+    {
+        if (this.gameObject.transform.name == "Enemy")
+        {
+            enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
+            if (FollowDistance > enemyDistance)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
+            }
+        }
+
+
+    }
+    private void Update()
+    {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.left, 3f);
+        Debug.DrawRay(transform.position, Vector2.right, Color.green);
+        if (hit.collider.transform.tag == "Level")
+        {
+            Debug.Log("cawdAWDA");
+        }
+    }
+
+    void Jump()
+    {
+        rb.AddForce(new Vector2(0, jumpForce));
+    }
+
+}
