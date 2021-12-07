@@ -87,8 +87,9 @@ public class PlayerController2D : MonoBehaviour
 
     void OnDisable()
     {
-        r2d.bodyType = RigidbodyType2D.Static;
         r2d.velocity = Vector3.zero;
+        r2d.bodyType = RigidbodyType2D.Static;
+
     }
 
     // Update is called once per frame

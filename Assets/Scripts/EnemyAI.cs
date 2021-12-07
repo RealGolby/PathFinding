@@ -1,45 +1,110 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyAI : MonoBehaviour
 {
-    [SerializeField] GameObject Player;
+    GameObject Player;
 
     [Header("Enemy")]
-    [SerializeField] Rigidbody2D rb;
-    [SerializeField] GameObject enemyGO;
+    Rigidbody2D rb;
+    SpriteRenderer sr;
     [SerializeField] float jumpForce;
-    [SerializeField] float FollowDistance;
+    [SerializeField] float followDistance;
+    [SerializeField] float attackDistance;
 
     public float EnemySpeed = 4f;
     float enemyDistance;
 
+    bool isGrounded;
+    bool isChasing;
+
+    [SerializeField] Transform groundCheck;
+    [SerializeField] LayerMask groundMask;
+
+    private void Start()
+    {
+        sr = GetComponent<SpriteRenderer>();
+        rb = GetComponent<Rigidbody2D>();
+        Player = GameObject.Find("Player");
+    }
+
     void FixedUpdate()
     {
-        if (this.gameObject.transform.name=="Enemy")
+        MoveEnemy();
+    }
+    private void Update()
+    {
+        Attack();
+        Jump();
+        updateEnemyFace();
+
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position, .2f, groundMask);
+    }
+    void updateEnemyFace()
+    {
+        if (isChasing)
         {
+            if (Player.transform.position.x > transform.position.x)
+            {
+                sr.flipX = false;
+            }
+            else if (Player.transform.position.x < transform.position.x)
+            {
+                sr.flipX = true;
+            }
+        }
+    }
+
+    void MoveEnemy()
+    {
             enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
-            if (FollowDistance > enemyDistance)
+            if (followDistance > enemyDistance)
             {
                 transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
+                isChasing = true;
             }
-        }  
+            else if (followDistance < enemyDistance)
+            {
+                isChasing = false;
+            }
     }
 
     void Jump()
     {
-        rb.AddForce(new Vector2(0,jumpForce)); 
-    }
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (this.gameObject.transform.name =="jumpCheck")
+        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
+        if (hitLeft)
         {
-            if (collision.transform.CompareTag("Obstacles"))
+            if (hitLeft.collider.transform.tag != "Enemy" && hitLeft.collider.transform.tag != "Player")
             {
-                Jump();
-                Debug.Log("Jump");
+                if (isGrounded)
+                {
+                    //rb.AddForce(new Vector2(5f, jumpForce));
+                    rb.velocity = new Vector2(rb.velocity.x + .5f, jumpForce);
+                    sr.flipX = false;
+                }
+
             }
+        }
+        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - 1.1f, transform.position.y), Vector2.right, .5f);
+        if (hitRight)
+        {
+            if (hitRight.collider.transform.tag != "Enemy" && hitRight.collider.transform.tag != "Player")
+            {
+                if (isGrounded)
+                {
+                    sr.flipX = true;
+                    //rb.AddForce(new Vector2(-5f, jumpForce));
+                    rb.velocity = new Vector2(rb.velocity.x + -.5f, jumpForce);
+                }
+            }
+        }
+    }
+
+    void Attack()
+    {
+        enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
+        if (attackDistance > enemyDistance)
+        {
+            Debug.Log("Attack player!");
         }
     }
 }
