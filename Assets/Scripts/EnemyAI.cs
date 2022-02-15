@@ -3,6 +3,7 @@ using UnityEngine;
 
 enum EnemyFace { Left, Right }
 
+enum EnemyState { Idle, Wander, Chase, Attack, Dead }
 public class EnemyAI : MonoBehaviour
 {
     GameObject Player;
@@ -18,10 +19,7 @@ public class EnemyAI : MonoBehaviour
     float enemyDistanceX;
     [SerializeField] float minEnemyDistance;
 
-    bool isDead;
     bool isGrounded;
-    bool isChasing;
-    bool isAttacking;
 
     [SerializeField] Transform groundCheck;
     [SerializeField] LayerMask groundMask;
@@ -32,14 +30,29 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] GameObject healthBar;
 
     EnemyFace enemyFace;
+    [SerializeField] EnemyState enemyState;
 
     [Header("Attaking")]
     [SerializeField] bool dashyAttack;
+    [SerializeField] float dashyAttackJumpX;
+    [SerializeField] float dashyAttackJumpY;
+
     [SerializeField] int enemyDamage;
     [SerializeField] float attackDistance;
 
+    [SerializeField] float attackIntervalMin;
+    [SerializeField] float attackIntervalMax;
+
+    [Header("Wandeing")]
+    [SerializeField] bool canWander;
+    bool canGoLeft;
+    bool canGoRight;
+    bool wanderWalk;
+    bool wandering;
+
     private void Start()
     {
+        enemyState = EnemyState.Idle;
         playerHealth = FindObjectOfType<HealthSystem>();
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
@@ -48,112 +61,200 @@ public class EnemyAI : MonoBehaviour
 
     void FixedUpdate()
     {
-        if (!isDead)
+        if (enemyState != EnemyState.Dead)
         {
-            MoveEnemy();
+            ChasePlayer();
             Jump();
             AttackPlayer();
+            if (enemyState != EnemyState.Chase && canWander)
+            {
+                Wander();
+            }
         }
     }
     private void Update()
     {
-        if (!isDead)
+        if (enemyState != EnemyState.Dead)
         {
             UpdateEnemyFace();
         }
 
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, .2f, groundMask);
     }
-    void UpdateEnemyFace()
+
+    void Wander()
     {
-        if (isChasing)
+        if(enemyState != EnemyState.Wander && !wanderWalk && !wandering) StartCoroutine(Wandering());
+
+        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + +.6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        if (hitLeft.collider == null)
         {
-            if (Player.transform.position.x > transform.position.x)
-            {
-                enemyFace = EnemyFace.Right;
-                sr.flipX = false;
-            }
-            else if (Player.transform.position.x < transform.position.x)
+            canGoLeft = false;
+            /*wanderWalk = false;           DODELAT ABY ENEMY NEPADAL
+            wandering = false;
+            StopCoroutine(Wandering());
+            enemyState = EnemyState.Idle;*/
+        }
+        else
+        {
+            canGoLeft = true;
+        }
+        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        if (hitRight.collider == null)
+        {
+            canGoRight = false;
+            /*wanderWalk = false;           DODELAT ABY ENEMY NEPADAL
+            wandering = false;
+            StopCoroutine(Wandering());
+            enemyState = EnemyState.Idle;*/
+        }
+        else
+        {
+            canGoRight = true;
+        }
+
+        if (wanderWalk)
+        {
+            MoveEnemy();
+        }
+    }
+
+    IEnumerator Wandering()
+    {
+        wandering = true;
+        yield return new WaitForSeconds(Random.Range(1,3));
+        if(Random.Range(0,2) == 0)
+        {
+            int side = Random.Range(0,2);
+            if(side == 0 && canGoLeft)
             {
                 enemyFace = EnemyFace.Left;
-                sr.flipX = true;
+                wanderWalk = true;
+                enemyState = EnemyState.Wander;
+                yield return new WaitForSeconds(Random.Range(1, 4));
+                    wanderWalk = false;
+                    enemyState = EnemyState.Idle;
+                    wandering = false;
             }
+            else if(side == 1 && canGoRight)
+            {
+                enemyFace = EnemyFace.Right;
+                wanderWalk = true;
+                enemyState = EnemyState.Wander;
+                yield return new WaitForSeconds(Random.Range(1,4));
+                    wanderWalk = false;
+                    enemyState = EnemyState.Idle;
+                    wandering = false;
+            }
+        }
+        else
+        {
+            wandering = false;
         }
     }
 
 
-    void MoveEnemy()
+    void UpdateEnemyFace()
+    {
+        if (enemyFace == EnemyFace.Right) sr.flipX = false;
+        else if (enemyFace == EnemyFace.Left) sr.flipX = true;
+    }
+
+    void ChasePlayer()
     {
         enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
         enemyDistanceX = Mathf.Abs(transform.position.x - Player.transform.position.x);
 
-        if (followDistance > enemyDistance && enemyDistanceX !>= minEnemyDistance)
+        if (followDistance > enemyDistance && enemyDistanceX! >= minEnemyDistance)
         {
-                if (enemyFace == EnemyFace.Right) transform.Translate(new Vector2(EnemySpeed * Time.fixedDeltaTime, 0));
-                else if (enemyFace == EnemyFace.Left) transform.Translate(new Vector2(-EnemySpeed * Time.fixedDeltaTime, 0));
-
-                //transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
-                isChasing = true;
+            if (enemyState != EnemyState.Attack)
+            {
+                StopCoroutine(Wandering());
+                MoveEnemy();
+                enemyState = EnemyState.Chase;
+                SetEnemyFace();
+            }
 
         }
-
-        else if (followDistance < enemyDistance)
+        /*else if (followDistance < enemyDistance)
         {
-            isChasing = false;
+            enemyState = EnemyState.Idle;
+        }*/
+
+    }
+
+    void SetEnemyFace()
+    {
+        if (Player.transform.position.x > transform.position.x)
+        {
+            enemyFace = EnemyFace.Right;
         }
+        else if (Player.transform.position.x < transform.position.x)
+        {
+            enemyFace = EnemyFace.Left;
+        }
+    }
+
+    void MoveEnemy()
+    {
+        if (enemyFace == EnemyFace.Right) transform.Translate(new Vector2(EnemySpeed * Time.fixedDeltaTime, 0));
+        else if (enemyFace == EnemyFace.Left) transform.Translate(new Vector2(-EnemySpeed * Time.fixedDeltaTime, 0));
+
+        //transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
     }
 
     void Jump()
     {
-        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
-        if (hitLeft)
+        if(enemyState != EnemyState.Wander)
         {
-            if (hitLeft.collider.transform.tag != "Enemy" && hitLeft.collider.transform.tag != "Player")
+            RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
+            if (hitLeft)
             {
-                if (isGrounded)
+                if (hitLeft.collider.transform.tag != "Enemy" && hitLeft.collider.transform.tag != "Player")
                 {
-                    //rb.AddForce(new Vector2(5f, jumpForce));
-                    rb.velocity = new Vector2(rb.velocity.x + jumpForceX, jumpForceY);
-                    sr.flipX = false;
-                }
+                    if (isGrounded)
+                    {
+                        //rb.AddForce(new Vector2(5f, jumpForce));
+                        rb.velocity = new Vector2(rb.velocity.x + -jumpForceX, jumpForceY);
+                        sr.flipX = false;
+                    }
 
-            }
-        }
-        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - 1.1f, transform.position.y), Vector2.right, .5f);
-        if (hitRight)
-        {
-            if (hitRight.collider.transform.tag != "Enemy" && hitRight.collider.transform.tag != "Player")
-            {
-                if (isGrounded)
-                {
-                    sr.flipX = true;
-                    //rb.AddForce(new Vector2(-5f, jumpForce));
-                    rb.velocity = new Vector2(rb.velocity.x + -jumpForceX, jumpForceY);
                 }
             }
+            RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - 1.1f, transform.position.y), Vector2.right, .5f);
+            if (hitRight)
+            {
+                if (hitRight.collider.transform.tag != "Enemy" && hitRight.collider.transform.tag != "Player")
+                {
+                    if (isGrounded)
+                    {
+                        sr.flipX = true;
+                        //rb.AddForce(new Vector2(-5f, jumpForce));
+                        rb.velocity = new Vector2(rb.velocity.x + jumpForceX, jumpForceY);
+                    }
+                }
+            }
         }
-
     }
 
     void AttackPlayer()
     {
         enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
-        if (attackDistance > enemyDistance && !isAttacking)
+        if (attackDistance > enemyDistance && enemyState != EnemyState.Attack)
         {
-            //takeDamage(15);
             StartCoroutine(Attack());
         }
     }
 
     IEnumerator Attack()
     {
-        isAttacking = true;
-        yield return new WaitForSeconds(Random.Range(.2f, .4f));
+        enemyState = EnemyState.Attack;
+        yield return new WaitForSeconds(Random.Range(attackIntervalMin, attackIntervalMax));
         if (dashyAttack)
         {
             if (enemyFace == EnemyFace.Left)
             {
-                rb.AddForce(new Vector2(-200f, 100));
+                rb.AddForce(new Vector2(-dashyAttackJumpX, dashyAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
                 playerHealth.Hchange(-enemyDamage);
@@ -161,13 +262,13 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
 
-                rb.AddForce(new Vector2(120f, 40));
-                yield return new WaitForSeconds(1.5f);
-                isAttacking = false;
+                rb.AddForce(new Vector2(dashyAttackJumpX / 2, dashyAttackJumpY / 2));
+                yield return new WaitForSeconds(.5f);
+                enemyState = EnemyState.Idle;
             }
             else if (enemyFace == EnemyFace.Right)
             {
-                rb.AddForce(new Vector2(200f, 100));
+                rb.AddForce(new Vector2(dashyAttackJumpX, dashyAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
                 playerHealth.Hchange(-enemyDamage);
@@ -175,9 +276,9 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
 
-                rb.AddForce(new Vector2(-120f, 40));
-                yield return new WaitForSeconds(1.5f);
-                isAttacking = false;
+                rb.AddForce(new Vector2(-dashyAttackJumpX / 2, dashyAttackJumpY / 2));
+                yield return new WaitForSeconds(.5f);
+                enemyState = EnemyState.Idle;
             }
         }
         else
@@ -185,23 +286,22 @@ public class EnemyAI : MonoBehaviour
             Debug.Log("Attack player!");
             playerHealth.Hchange(-enemyDamage);
             yield return new WaitForSeconds(2f);
-            isAttacking = false;
+            enemyState = EnemyState.Chase;
         }
 
     }
 
-    public void TakeDamage(int damageAmount)
+    void TakeDamage(int damageAmount)
     {
         this.Health -= damageAmount;
         this.healthBar.transform.localScale = new Vector3((Health / 100f) * 2f, .25f, 1f);
         if (Health <= 0)
         {
-            isDead = true;
+            enemyState = EnemyState.Dead;
             rb.velocity = Vector2.zero;
             healthBar.transform.localScale = Vector3.zero;
             Debug.Log("Enemy Died");
-            Object.Destroy(gameObject,.5f);
+            Object.Destroy(gameObject, .5f);
         }
     }
-
 }

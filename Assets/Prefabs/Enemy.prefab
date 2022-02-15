@@ -298,16 +298,22 @@ MonoBehaviour:
   jumpForceX: 0.5
   followDistance: 6
   EnemySpeed: 3
-  minEnemyDistance: 2
+  minEnemyDistance: 1.5
   groundCheck: {fileID: 7995764620867976400}
   groundMask:
     serializedVersion: 2
     m_Bits: 128
   Health: 100
   healthBar: {fileID: 5402375180345523315}
+  enemyState: 0
   dashyAttack: 1
+  dashyAttackJumpX: 300
+  dashyAttackJumpY: 100
   enemyDamage: 15
-  attackDistance: 2.2
+  attackDistance: 1.8
+  attackIntervalMin: 0.2
+  attackIntervalMax: 0.4
+  canWander: 1
 --- !u!50 &7995764620833760979
 Rigidbody2D:
   serializedVersion: 4
