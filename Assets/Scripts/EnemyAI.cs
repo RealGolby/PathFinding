@@ -170,6 +170,8 @@ public class EnemyAI : MonoBehaviour
             if (enemyState != EnemyState.Attack)
             {
                 StopCoroutine(Wandering());
+                wandering = false;
+                wanderWalk = false;
                 MoveEnemy();
                 enemyState = EnemyState.Chase;
                 SetEnemyFace();
