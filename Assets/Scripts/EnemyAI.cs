@@ -45,13 +45,15 @@ public class EnemyAI : MonoBehaviour
 
     [Header("Wandeing")]
     [SerializeField] bool canWander;
-    bool canGoLeft;
-    bool canGoRight;
-    public bool wanderWalk;
-    public bool wandering;
+
+    [SerializeField] bool canGoLeft;
+    [SerializeField] bool canGoRight;
+    [SerializeField] bool wanderWalk;
+    [SerializeField] bool wandering;
 
     private void Start()
     {
+        Time.timeScale = 10;
         enemyState = EnemyState.Idle;
         playerHealth = FindObjectOfType<HealthSystem>();
         sr = GetComponent<SpriteRenderer>();
@@ -123,6 +125,7 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator Wandering()
     {
+        Debug.Log("Started wandering coroutine");
         wandering = true;
         yield return new WaitForSeconds(Random.Range(1, 3));
         if (Random.Range(0, 2) == 0)
@@ -137,7 +140,6 @@ public class EnemyAI : MonoBehaviour
                 wanderWalk = false;
                 enemyState = EnemyState.Idle;
                 wandering = false;
-                StopCoroutine(Wandering());
             }
             else if (side == 1 && canGoRight)
             {
@@ -148,12 +150,20 @@ public class EnemyAI : MonoBehaviour
                 wanderWalk = false;
                 enemyState = EnemyState.Idle;
                 wandering = false;
-                StopCoroutine(Wandering());
             }
+            else
+            {
+                StopCoroutine(Wandering());
+                wandering = false;
+                wanderWalk = false;
+                enemyState = EnemyState.Idle;
+            }
+
         }
         else
         {
             wandering = false;
+            Debug.Log("Wandering unsuccefull");
         }
     }
 
