@@ -33,7 +33,7 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] EnemyState enemyState;
 
     [Header("Attaking")]
-    [SerializeField] bool dashyAttack;
+    [SerializeField] bool dashAttack;
     [SerializeField] float dashyAttackJumpX;
     [SerializeField] float dashyAttackJumpY;
 
@@ -47,8 +47,8 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] bool canWander;
     bool canGoLeft;
     bool canGoRight;
-    bool wanderWalk;
-    bool wandering;
+    public bool wanderWalk;
+    public bool wandering;
 
     private void Start()
     {
@@ -66,7 +66,7 @@ public class EnemyAI : MonoBehaviour
             ChasePlayer();
             Jump();
             AttackPlayer();
-            if (enemyState != EnemyState.Chase && canWander)
+            if (enemyState != EnemyState.Chase && canWander && enemyState != EnemyState.Attack)
             {
                 Wander();
             }
@@ -74,6 +74,8 @@ public class EnemyAI : MonoBehaviour
     }
     private void Update()
     {
+        if(enemyState != EnemyState.Idle)
+        Debug.Log(enemyState);
         if (enemyState != EnemyState.Dead)
         {
             UpdateEnemyFace();
@@ -84,9 +86,9 @@ public class EnemyAI : MonoBehaviour
 
     void Wander()
     {
-        if(enemyState != EnemyState.Wander && !wanderWalk && !wandering) StartCoroutine(Wandering());
+        if (enemyState != EnemyState.Wander && !wanderWalk && !wandering && enemyState != EnemyState.Attack) StartCoroutine(Wandering());
 
-        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + +.6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x +.6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
         if (hitLeft.collider == null)
         {
             canGoLeft = false;
@@ -122,29 +124,31 @@ public class EnemyAI : MonoBehaviour
     IEnumerator Wandering()
     {
         wandering = true;
-        yield return new WaitForSeconds(Random.Range(1,3));
-        if(Random.Range(0,2) == 0)
+        yield return new WaitForSeconds(Random.Range(1, 3));
+        if (Random.Range(0, 2) == 0)
         {
-            int side = Random.Range(0,2);
-            if(side == 0 && canGoLeft)
+            int side = Random.Range(0, 2);
+            if (side == 0 && canGoLeft)
             {
                 enemyFace = EnemyFace.Left;
                 wanderWalk = true;
                 enemyState = EnemyState.Wander;
                 yield return new WaitForSeconds(Random.Range(1, 4));
-                    wanderWalk = false;
-                    enemyState = EnemyState.Idle;
-                    wandering = false;
+                wanderWalk = false;
+                enemyState = EnemyState.Idle;
+                wandering = false;
+                StopCoroutine(Wandering());
             }
-            else if(side == 1 && canGoRight)
+            else if (side == 1 && canGoRight)
             {
                 enemyFace = EnemyFace.Right;
                 wanderWalk = true;
                 enemyState = EnemyState.Wander;
-                yield return new WaitForSeconds(Random.Range(1,4));
-                    wanderWalk = false;
-                    enemyState = EnemyState.Idle;
-                    wandering = false;
+                yield return new WaitForSeconds(Random.Range(1, 4));
+                wanderWalk = false;
+                enemyState = EnemyState.Idle;
+                wandering = false;
+                StopCoroutine(Wandering());
             }
         }
         else
@@ -169,19 +173,23 @@ public class EnemyAI : MonoBehaviour
         {
             if (enemyState != EnemyState.Attack)
             {
-                StopCoroutine(Wandering());
-                wandering = false;
-                wanderWalk = false;
+                if (enemyState == EnemyState.Wander)
+                {
+                    StopCoroutine(Wandering());
+                    Debug.Log("Stopped wandering coroutine");
+                    wandering = false;
+                    wanderWalk = false;
+                }
                 MoveEnemy();
                 enemyState = EnemyState.Chase;
                 SetEnemyFace();
             }
 
         }
-        /*else if (followDistance < enemyDistance)
+        else if (followDistance < enemyDistance && enemyState != EnemyState.Attack && enemyState == EnemyState.Chase)
         {
             enemyState = EnemyState.Idle;
-        }*/
+        }
 
     }
 
@@ -207,7 +215,7 @@ public class EnemyAI : MonoBehaviour
 
     void Jump()
     {
-        if(enemyState != EnemyState.Wander)
+        if (enemyState != EnemyState.Wander && enemyState != EnemyState.Attack)
         {
             RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
             if (hitLeft)
@@ -250,9 +258,10 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator Attack()
     {
+        Debug.Log("Started attack coroutine");
         enemyState = EnemyState.Attack;
         yield return new WaitForSeconds(Random.Range(attackIntervalMin, attackIntervalMax));
-        if (dashyAttack)
+        if (dashAttack)
         {
             if (enemyFace == EnemyFace.Left)
             {
@@ -267,6 +276,7 @@ public class EnemyAI : MonoBehaviour
                 rb.AddForce(new Vector2(dashyAttackJumpX / 2, dashyAttackJumpY / 2));
                 yield return new WaitForSeconds(.5f);
                 enemyState = EnemyState.Idle;
+                StopCoroutine(Attack());
             }
             else if (enemyFace == EnemyFace.Right)
             {
@@ -281,6 +291,7 @@ public class EnemyAI : MonoBehaviour
                 rb.AddForce(new Vector2(-dashyAttackJumpX / 2, dashyAttackJumpY / 2));
                 yield return new WaitForSeconds(.5f);
                 enemyState = EnemyState.Idle;
+                StopCoroutine(Attack());
             }
         }
         else
@@ -288,7 +299,7 @@ public class EnemyAI : MonoBehaviour
             Debug.Log("Attack player!");
             playerHealth.Hchange(-enemyDamage);
             yield return new WaitForSeconds(2f);
-            enemyState = EnemyState.Chase;
+            enemyState = EnemyState.Idle;
         }
 
     }
@@ -303,7 +314,7 @@ public class EnemyAI : MonoBehaviour
             rb.velocity = Vector2.zero;
             healthBar.transform.localScale = Vector3.zero;
             Debug.Log("Enemy Died");
-            Object.Destroy(gameObject, .5f);
+            Destroy(gameObject, .5f);
         }
     }
 }
