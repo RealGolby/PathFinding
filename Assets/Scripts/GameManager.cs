@@ -15,7 +15,7 @@ public class GameManager : MonoBehaviour
         
         foreach (var enemy in Enemies)
         {
-            enemy.GetComponent<SpriteRenderer>().color = Random.ColorHSV();
+            enemy.GetComponent<SpriteRenderer>().color = Random.ColorHSV(0f, 1f, 1f, 1f, 0.5f, 1f);
         }
     }
 

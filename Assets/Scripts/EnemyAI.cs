@@ -69,7 +69,7 @@ public class EnemyAI : MonoBehaviour
     bool wanderWalk;
     bool wandering;
 
-    private void Start()
+    void Start()
     {
         enemyState = EnemyState.Idle;
         playerHealth = FindObjectOfType<HealthSystem>();
@@ -91,7 +91,7 @@ public class EnemyAI : MonoBehaviour
             }
         }
     }
-    private void Update()
+    void Update()
     {
         if (enemyState != EnemyState.Dead)
         {
