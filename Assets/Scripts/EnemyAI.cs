@@ -4,20 +4,24 @@ using UnityEngine;
 enum EnemyFace { Left, Right }
 
 enum EnemyState { Idle, Wander, Chase, Attack, Dead }
+
 public class EnemyAI : MonoBehaviour
 {
     GameObject Player;
 
     Rigidbody2D rb;
     SpriteRenderer sr;
+
     [SerializeField] float jumpForceY;
     [SerializeField] float jumpForceX;
     [SerializeField] float followDistance;
+    [SerializeField, Tooltip("Jak moc se enemy muze priblizit k hraci")]
+    float minEnemyDistance;
 
     public float EnemySpeed = 4f;
     float enemyDistance;
     float enemyDistanceX;
-    [SerializeField] float minEnemyDistance;
+
 
     bool isGrounded;
 
@@ -26,10 +30,10 @@ public class EnemyAI : MonoBehaviour
 
     HealthSystem playerHealth;
 
-    public float Health = 100;
+    public float EnemyHealth = 100;
     [SerializeField] GameObject healthBar;
 
-    EnemyFace enemyFace;
+    [SerializeField] EnemyFace enemyFace;
     [SerializeField] EnemyState enemyState;
 
     [Header("Attaking")]
@@ -44,10 +48,21 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] float attackIntervalMax;
 
     [Header("Wandeing")]
-    [SerializeField] bool canWander;
+    [SerializeField] 
+    bool canWander;
 
-    [SerializeField] bool canGoLeft;
-    [SerializeField] bool canGoRight;
+    [SerializeField, Tooltip("minimalni cas ve kterym se enemy bude rozhodovat jestli ma sam chodit")]
+    float minTimeBetweenWander;
+    [SerializeField, Tooltip("maximalni cas ve kterym se enemy bude rozhodovat jestli ma sam chodit")]
+    float maxTimeBetweenWander;
+
+    [SerializeField, Tooltip("nejmensi cas po ktery bude enemak sam chodit")]
+    float minWanderTime;
+    [SerializeField, Tooltip("nejvyssi cas po ktery bude enemak sam chodit")]
+    float maxWanderTime;
+
+    bool canGoLeft;
+    bool canGoRight;
     bool wanderWalk;
     bool wandering;
 
@@ -117,7 +132,7 @@ public class EnemyAI : MonoBehaviour
     IEnumerator Wandering()
     {
         wandering = true;
-        yield return new WaitForSeconds(Random.Range(1, 3));
+        yield return new WaitForSeconds(Random.Range(minTimeBetweenWander, maxTimeBetweenWander));
         if (Random.Range(0, 2) == 0)
         {
             int side = Random.Range(0, 2);
@@ -126,7 +141,7 @@ public class EnemyAI : MonoBehaviour
                 enemyFace = EnemyFace.Left;
                 wanderWalk = true;
                 enemyState = EnemyState.Wander;
-                yield return new WaitForSeconds(Random.Range(1, 4));
+                yield return new WaitForSeconds(Random.Range(minWanderTime, maxWanderTime));
                 wanderWalk = false;
                 enemyState = EnemyState.Idle;
                 wandering = false;
@@ -136,7 +151,7 @@ public class EnemyAI : MonoBehaviour
                 enemyFace = EnemyFace.Right;
                 wanderWalk = true;
                 enemyState = EnemyState.Wander;
-                yield return new WaitForSeconds(Random.Range(1, 4));
+                yield return new WaitForSeconds(Random.Range(minWanderTime, maxWanderTime));
                 wanderWalk = false;
                 enemyState = EnemyState.Idle;
                 wandering = false;
@@ -224,10 +239,6 @@ public class EnemyAI : MonoBehaviour
 
     }
 
-
-    //transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
-
-
     void Jump()
     {
         if (enemyState != EnemyState.Wander && enemyState != EnemyState.Attack && enemyState != EnemyState.Idle)
@@ -239,7 +250,6 @@ public class EnemyAI : MonoBehaviour
                 {
                     if (isGrounded)
                     {
-                        //rb.AddForce(new Vector2(5f, jumpForce));
                         rb.velocity = new Vector2(rb.velocity.x + -jumpForceX, jumpForceY);
                         Debug.LogWarning("Jump left");
                         sr.flipX = false;
@@ -255,9 +265,7 @@ public class EnemyAI : MonoBehaviour
                     if (isGrounded)
                     {
                         sr.flipX = true;
-                        //rb.AddForce(new Vector2(-5f, jumpForce));
                         rb.velocity = new Vector2(rb.velocity.x + jumpForceX, jumpForceY);
-                        Debug.LogWarning("Jump right");
                     }
                 }
             }
@@ -275,7 +283,6 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator Attack()
     {
-        Debug.Log("Started attack coroutine");
         enemyState = EnemyState.Attack;
         yield return new WaitForSeconds(Random.Range(attackIntervalMin, attackIntervalMax));
         if (dashAttack)
@@ -323,9 +330,9 @@ public class EnemyAI : MonoBehaviour
 
     void TakeDamage(int damageAmount)
     {
-        this.Health -= damageAmount;
-        this.healthBar.transform.localScale = new Vector3((Health / 100f) * 2f, .25f, 1f);
-        if (Health <= 0)
+        this.EnemyHealth -= damageAmount;
+        this.healthBar.transform.localScale = new Vector3((EnemyHealth / 100f) * 2f, .25f, 1f);
+        if (EnemyHealth <= 0)
         {
             enemyState = EnemyState.Dead;
             rb.velocity = Vector2.zero;
