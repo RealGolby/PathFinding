@@ -48,12 +48,11 @@ public class EnemyAI : MonoBehaviour
 
     [SerializeField] bool canGoLeft;
     [SerializeField] bool canGoRight;
-    [SerializeField] bool wanderWalk;
-    [SerializeField] bool wandering;
+    bool wanderWalk;
+    bool wandering;
 
     private void Start()
     {
-        Time.timeScale = 10;
         enemyState = EnemyState.Idle;
         playerHealth = FindObjectOfType<HealthSystem>();
         sr = GetComponent<SpriteRenderer>();
@@ -76,8 +75,6 @@ public class EnemyAI : MonoBehaviour
     }
     private void Update()
     {
-        if(enemyState != EnemyState.Idle)
-        Debug.Log(enemyState);
         if (enemyState != EnemyState.Dead)
         {
             UpdateEnemyFace();
@@ -90,31 +87,25 @@ public class EnemyAI : MonoBehaviour
     {
         if (enemyState != EnemyState.Wander && !wanderWalk && !wandering && enemyState != EnemyState.Attack) StartCoroutine(Wandering());
 
-        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x +.6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
-        if (hitLeft.collider == null)
-        {
-            canGoLeft = false;
-            /*wanderWalk = false;           DODELAT ABY ENEMY NEPADAL
-            wandering = false;
-            StopCoroutine(Wandering());
-            enemyState = EnemyState.Idle;*/
-        }
-        else
-        {
-            canGoLeft = true;
-        }
-        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x + .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        Debug.DrawRay(new Vector2(transform.position.x + .6f, transform.position.y - .5f), Vector2.down / 2);
         if (hitRight.collider == null)
         {
             canGoRight = false;
-            /*wanderWalk = false;           DODELAT ABY ENEMY NEPADAL
-            wandering = false;
-            StopCoroutine(Wandering());
-            enemyState = EnemyState.Idle;*/
         }
         else
         {
             canGoRight = true;
+        }
+        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
+        Debug.DrawRay(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down / 2);
+        if (hitLeft.collider == null)
+        {
+            canGoLeft = false;
+        }
+        else
+        {
+            canGoLeft = true;
         }
 
         if (wanderWalk)
@@ -125,7 +116,6 @@ public class EnemyAI : MonoBehaviour
 
     IEnumerator Wandering()
     {
-        Debug.Log("Started wandering coroutine");
         wandering = true;
         yield return new WaitForSeconds(Random.Range(1, 3));
         if (Random.Range(0, 2) == 0)
@@ -163,7 +153,6 @@ public class EnemyAI : MonoBehaviour
         else
         {
             wandering = false;
-            Debug.Log("Wandering unsuccefull");
         }
     }
 
@@ -217,15 +206,31 @@ public class EnemyAI : MonoBehaviour
 
     void MoveEnemy()
     {
-        if (enemyFace == EnemyFace.Right) transform.Translate(new Vector2(EnemySpeed * Time.fixedDeltaTime, 0));
-        else if (enemyFace == EnemyFace.Left) transform.Translate(new Vector2(-EnemySpeed * Time.fixedDeltaTime, 0));
+        float EnemySpeedLeft = EnemySpeed;
+        float EnemySpeedRight = EnemySpeed;
+        if (enemyState == EnemyState.Wander)
+        {
+            if (!canGoLeft)
+            {
+                EnemySpeedLeft = 0;
+            }
+            else if (!canGoRight)
+            {
+                EnemySpeedRight = 0;
+            }
+        }
+        if (enemyFace == EnemyFace.Right) transform.Translate(new Vector2(EnemySpeedRight * Time.fixedDeltaTime, 0));
+        else if (enemyFace == EnemyFace.Left) transform.Translate(new Vector2(-EnemySpeedLeft * Time.fixedDeltaTime, 0));
 
-        //transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
     }
+
+
+    //transform.position = Vector3.MoveTowards(transform.position, Player.transform.position, EnemySpeed * Time.fixedDeltaTime);
+
 
     void Jump()
     {
-        if (enemyState != EnemyState.Wander && enemyState != EnemyState.Attack)
+        if (enemyState != EnemyState.Wander && enemyState != EnemyState.Attack && enemyState != EnemyState.Idle)
         {
             RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
             if (hitLeft)
@@ -236,6 +241,7 @@ public class EnemyAI : MonoBehaviour
                     {
                         //rb.AddForce(new Vector2(5f, jumpForce));
                         rb.velocity = new Vector2(rb.velocity.x + -jumpForceX, jumpForceY);
+                        Debug.LogWarning("Jump left");
                         sr.flipX = false;
                     }
 
@@ -251,6 +257,7 @@ public class EnemyAI : MonoBehaviour
                         sr.flipX = true;
                         //rb.AddForce(new Vector2(-5f, jumpForce));
                         rb.velocity = new Vector2(rb.velocity.x + jumpForceX, jumpForceY);
+                        Debug.LogWarning("Jump right");
                     }
                 }
             }
