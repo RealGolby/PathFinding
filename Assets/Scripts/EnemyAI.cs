@@ -5,6 +5,8 @@ enum EnemyFace { Left, Right }
 
 enum EnemyState { Idle, Wander, Chase, Attack, Dead }
 
+enum EnemyAttackType { Normal, Dash}
+
 public class EnemyAI : MonoBehaviour
 {
     GameObject Player;
@@ -37,15 +39,16 @@ public class EnemyAI : MonoBehaviour
     [SerializeField] EnemyState enemyState;
 
     [Header("Attaking")]
-    [SerializeField] bool dashAttack;
-    [SerializeField] float dashyAttackJumpX;
-    [SerializeField] float dashyAttackJumpY;
-
-    [SerializeField] int enemyDamage;
-    [SerializeField] float attackDistance;
-
+    [SerializeField] EnemyAttackType attackType;
+    public int enemyDamage;
+    [SerializeField] float enemyAttackDistance;
     [SerializeField] float attackIntervalMin;
     [SerializeField] float attackIntervalMax;
+
+    [Space(10)]
+    [SerializeField] float dashAttackJumpX;
+    [SerializeField] float dashAttackJumpY;
+    [Space(10)]
 
     [Header("Wandeing")]
     [SerializeField] 
@@ -190,7 +193,6 @@ public class EnemyAI : MonoBehaviour
                 if (enemyState == EnemyState.Wander)
                 {
                     StopCoroutine(Wandering());
-                    Debug.Log("Stopped wandering coroutine");
                     wandering = false;
                     wanderWalk = false;
                 }
@@ -251,7 +253,6 @@ public class EnemyAI : MonoBehaviour
                     if (isGrounded)
                     {
                         rb.velocity = new Vector2(rb.velocity.x + -jumpForceX, jumpForceY);
-                        Debug.LogWarning("Jump left");
                         sr.flipX = false;
                     }
 
@@ -275,7 +276,7 @@ public class EnemyAI : MonoBehaviour
     void AttackPlayer()
     {
         enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
-        if (attackDistance > enemyDistance && enemyState != EnemyState.Attack)
+        if (enemyAttackDistance > enemyDistance && enemyState != EnemyState.Attack)
         {
             StartCoroutine(Attack());
         }
@@ -285,11 +286,11 @@ public class EnemyAI : MonoBehaviour
     {
         enemyState = EnemyState.Attack;
         yield return new WaitForSeconds(Random.Range(attackIntervalMin, attackIntervalMax));
-        if (dashAttack)
+        if (attackType == EnemyAttackType.Dash)
         {
             if (enemyFace == EnemyFace.Left)
             {
-                rb.AddForce(new Vector2(-dashyAttackJumpX, dashyAttackJumpY));
+                rb.AddForce(new Vector2(-dashAttackJumpX, dashAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
                 playerHealth.Hchange(-enemyDamage);
@@ -297,14 +298,13 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
 
-                rb.AddForce(new Vector2(dashyAttackJumpX / 2, dashyAttackJumpY / 2));
+                rb.AddForce(new Vector2(dashAttackJumpX / 2, dashAttackJumpY / 2));
                 yield return new WaitForSeconds(.5f);
                 enemyState = EnemyState.Idle;
-                StopCoroutine(Attack());
             }
             else if (enemyFace == EnemyFace.Right)
             {
-                rb.AddForce(new Vector2(dashyAttackJumpX, dashyAttackJumpY));
+                rb.AddForce(new Vector2(dashAttackJumpX, dashAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
                 playerHealth.Hchange(-enemyDamage);
@@ -312,10 +312,9 @@ public class EnemyAI : MonoBehaviour
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
 
-                rb.AddForce(new Vector2(-dashyAttackJumpX / 2, dashyAttackJumpY / 2));
+                rb.AddForce(new Vector2(-dashAttackJumpX / 2, dashAttackJumpY / 2));
                 yield return new WaitForSeconds(.5f);
                 enemyState = EnemyState.Idle;
-                StopCoroutine(Attack());
             }
         }
         else
@@ -330,8 +329,8 @@ public class EnemyAI : MonoBehaviour
 
     void TakeDamage(int damageAmount)
     {
-        this.EnemyHealth -= damageAmount;
-        this.healthBar.transform.localScale = new Vector3((EnemyHealth / 100f) * 2f, .25f, 1f);
+        EnemyHealth -= damageAmount;
+        healthBar.transform.localScale = new Vector3((EnemyHealth / 100f) * 2f, .25f, 1f);
         if (EnemyHealth <= 0)
         {
             enemyState = EnemyState.Dead;
