@@ -107,6 +107,7 @@ public class EnemyAI : MonoBehaviour
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, .2f, groundMask);
     }
 
+    #region Movement
     void Wander()
     {
         if (enemyState != EnemyState.Wander && !wanderWalk && !wandering && enemyState != EnemyState.Attack) StartCoroutine(Wandering());
@@ -179,7 +180,6 @@ public class EnemyAI : MonoBehaviour
             wandering = false;
         }
     }
-
 
     void UpdateEnemyFace()
     {
@@ -277,7 +277,9 @@ public class EnemyAI : MonoBehaviour
             }
         }
     }
+    #endregion
 
+    #region Attacking
     void AttackPlayer()
     {
         enemyDistance = Vector3.Distance(transform.position, Player.transform.position);
@@ -329,9 +331,7 @@ public class EnemyAI : MonoBehaviour
             yield return new WaitForSeconds(2f);
             enemyState = EnemyState.Idle;
         }
-
     }
-
     void TakeDamage(int damageAmount)
     {
         EnemyHealth -= damageAmount;
@@ -345,4 +345,6 @@ public class EnemyAI : MonoBehaviour
             Destroy(gameObject, .5f);
         }
     }
+
+    #endregion
 }
