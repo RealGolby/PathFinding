@@ -69,8 +69,6 @@ public class BossAI : MonoBehaviour
 
         secondPhaseAttacks = SecondPhaseAttacks.Single;
     }
-    float timeToSwing = 1f;
-    float time = 0;
     void Update()
     {
         if (bossState != BossState.Dead  && bossPhase == BossPhase.First)
@@ -80,11 +78,6 @@ public class BossAI : MonoBehaviour
         else if(bossState != BossState.Dead && bossPhase == BossPhase.Second)
         {
             moveBossToCenter();
-            while(time < timeToSwing)
-            {
-                transform.position = Vector3.Lerp(transform.position,new Vector3(transform.position.x,transform.position.y+1),time);
-                time -= Time.deltaTime;
-            }
         }
     }
 

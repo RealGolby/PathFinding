@@ -2507,11 +2507,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2742408487609895793, guid: 11e2f471ebb021842bdc29470a204b89, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -14.34
+      value: 4.4
       objectReference: {fileID: 0}
     - target: {fileID: 2742408487609895793, guid: 11e2f471ebb021842bdc29470a204b89, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 9.65
+      value: 3.59
       objectReference: {fileID: 0}
     - target: {fileID: 2742408487609895793, guid: 11e2f471ebb021842bdc29470a204b89, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2881,6 +2881,10 @@ PrefabInstance:
       value: Boss
       objectReference: {fileID: 0}
     - target: {fileID: 6886128365876622046, guid: 3790f68eb81261a429d5148b1b46c9d5, type: 3}
+      propertyPath: circleProjectile
+      value: 
+      objectReference: {fileID: 7453932858320328808, guid: 3f878ddd230993345bb1a37be5f71fe3, type: 3}
+    - target: {fileID: 6886128365876622046, guid: 3790f68eb81261a429d5148b1b46c9d5, type: 3}
       propertyPath: timeBetweenShots
       value: 0.4
       objectReference: {fileID: 0}
@@ -2898,7 +2902,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6886128365876622046, guid: 3790f68eb81261a429d5148b1b46c9d5, type: 3}
       propertyPath: circleProjectilesToShoot
-      value: 6
+      value: 15
       objectReference: {fileID: 0}
     - target: {fileID: 6886128365876622046, guid: 3790f68eb81261a429d5148b1b46c9d5, type: 3}
       propertyPath: singleProjectilesToShoot
