@@ -246,6 +246,9 @@ MonoBehaviour:
   followDistance: 6
   minEnemyDistance: 1.5
   EnemySpeed: 3
+  jumpDetectionOffset: 1.1
+  wanderFallOffsetX: 0.6
+  wanderFallOffsetY: 0.5
   groundCheck: {fileID: 7995764620867976400}
   groundMask:
     serializedVersion: 2

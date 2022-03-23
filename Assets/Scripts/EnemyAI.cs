@@ -14,6 +14,8 @@ public class EnemyAI : MonoBehaviour
     Rigidbody2D rb;
     SpriteRenderer sr;
 
+    [Header("Movement")]
+
     [SerializeField] float jumpForceY;
     [SerializeField] float jumpForceX;
     [SerializeField] float followDistance;
@@ -24,6 +26,10 @@ public class EnemyAI : MonoBehaviour
     float enemyDistance;
     float enemyDistanceX;
 
+    [SerializeField]float jumpDetectionOffset;
+
+    [SerializeField] float wanderFallOffsetX;
+    [SerializeField]float wanderFallOffsetY;
 
     bool isGrounded;
 
@@ -63,7 +69,7 @@ public class EnemyAI : MonoBehaviour
     float minWanderTime;
     [SerializeField, Tooltip("nejvyssi cas po ktery bude enemak sam chodit")]
     float maxWanderTime;
-
+    
     bool canGoLeft;
     bool canGoRight;
     bool wanderWalk;
@@ -97,7 +103,7 @@ public class EnemyAI : MonoBehaviour
         {
             UpdateEnemyFace();
         }
-
+        
         isGrounded = Physics2D.OverlapCircle(groundCheck.position, .2f, groundMask);
     }
 
@@ -105,8 +111,8 @@ public class EnemyAI : MonoBehaviour
     {
         if (enemyState != EnemyState.Wander && !wanderWalk && !wandering && enemyState != EnemyState.Attack) StartCoroutine(Wandering());
 
-        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x + .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
-        Debug.DrawRay(new Vector2(transform.position.x + .6f, transform.position.y - .5f), Vector2.down / 2);
+        RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x + wanderFallOffsetX, transform.position.y - wanderFallOffsetY), Vector2.down, .5f, groundMask);
+        Debug.DrawRay(new Vector2(transform.position.x + wanderFallOffsetX, transform.position.y - wanderFallOffsetY), Vector2.down / 2);
         if (hitRight.collider == null)
         {
             canGoRight = false;
@@ -115,8 +121,8 @@ public class EnemyAI : MonoBehaviour
         {
             canGoRight = true;
         }
-        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down, .5f, groundMask);
-        Debug.DrawRay(new Vector2(transform.position.x - .6f, transform.position.y - .5f), Vector2.down / 2);
+        RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x - wanderFallOffsetX, transform.position.y - wanderFallOffsetY), Vector2.down, .5f, groundMask);
+        Debug.DrawRay(new Vector2(transform.position.x - wanderFallOffsetX, transform.position.y - wanderFallOffsetY), Vector2.down / 2);
         if (hitLeft.collider == null)
         {
             canGoLeft = false;
@@ -238,14 +244,13 @@ public class EnemyAI : MonoBehaviour
         }
         if (enemyFace == EnemyFace.Right) transform.Translate(new Vector2(EnemySpeedRight * Time.fixedDeltaTime, 0));
         else if (enemyFace == EnemyFace.Left) transform.Translate(new Vector2(-EnemySpeedLeft * Time.fixedDeltaTime, 0));
-
     }
 
     void Jump()
     {
         if (enemyState != EnemyState.Wander && enemyState != EnemyState.Attack && enemyState != EnemyState.Idle)
         {
-            RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + 1.1f, transform.position.y), Vector2.left, .5f);
+            RaycastHit2D hitLeft = Physics2D.Raycast(new Vector2(transform.position.x + jumpDetectionOffset, transform.position.y), Vector2.left, .5f);
             if (hitLeft)
             {
                 if (hitLeft.collider.transform.tag != "Enemy" && hitLeft.collider.transform.tag != "Player")
@@ -258,7 +263,7 @@ public class EnemyAI : MonoBehaviour
 
                 }
             }
-            RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - 1.1f, transform.position.y), Vector2.right, .5f);
+            RaycastHit2D hitRight = Physics2D.Raycast(new Vector2(transform.position.x - jumpDetectionOffset, transform.position.y), Vector2.right, .5f);
             if (hitRight)
             {
                 if (hitRight.collider.transform.tag != "Enemy" && hitRight.collider.transform.tag != "Player")
