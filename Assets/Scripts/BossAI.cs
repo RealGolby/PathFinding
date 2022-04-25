@@ -212,7 +212,7 @@ public class BossAI : MonoBehaviour
             Vector2 direction = difference / distance;
             direction.Normalize();
             GameObject projectile = Instantiate(singleProjectile, transform);
-            projectile.transform.position = ArenaCenter;
+            projectile.transform.position = ArenaCenter + new Vector3(0,2,0);
             projectile.transform.rotation = Quaternion.Euler(0, 0, rotationZ);
             projectile.GetComponent<Rigidbody2D>().velocity = direction * singleProjectileSpeed;
             yield return new WaitForSeconds(singleTimeBetweenShots);
@@ -237,7 +237,7 @@ public class BossAI : MonoBehaviour
             for (int x = -1; x < shotgunProjectilesPerShoot - 1; x++)
             {
                 GameObject projectileInstance = Instantiate(shotgunProjectile, transform);
-                projectileInstance.transform.position = ArenaCenter;
+                projectileInstance.transform.position = ArenaCenter + new Vector3(0, 2, 0); ;
                 projectileInstance.transform.rotation = Quaternion.Euler(0, 0, rotationZ + x * 35);
                 projectileInstance.GetComponent<Rigidbody2D>().velocity = direction * shotgunProjectileSpeed;
             }
@@ -258,7 +258,7 @@ public class BossAI : MonoBehaviour
             float angle = (point * Mathf.PI * 2);
             float x = Mathf.Sin(angle) * 1;
             float y = Mathf.Cos(angle) * 1;
-            Vector3 pos = new Vector3(x, y, 0) + ArenaCenter;
+            Vector3 pos = new Vector3(x, y, 0) + ArenaCenter + new Vector3(0, 2, 0); ;
             GameObject projectile = Instantiate(circleProjectile, pos, Quaternion.Euler(0, 0, -Mathf.Rad2Deg * angle + rndAngle));
         }
         yield return new WaitForSeconds(.5f);

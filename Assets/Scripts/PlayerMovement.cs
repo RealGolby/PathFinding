@@ -5,65 +5,27 @@ using UnityEngine;
 public class PlayerMovement : MonoBehaviour
 {
     Rigidbody2D rb;
-    public float speed;
-    public float dashForceSide;
-    public float dashForceUp;
-    public float jumpForce;
-    private GroundDetector Dscript;
-    private float dragToRemember;
-    private bool canDash;
-    // Start is called before the first frame update
-    void Start()
+    bool isGrounded;
+
+    [SerializeField] LayerMask mask;
+
+    [SerializeField] Transform groundCheck;
+    private void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-        Dscript = GameObject.Find("Ground detector").GetComponent<GroundDetector>();
-        dragToRemember = rb.drag;
     }
-
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        if (Dscript.IsOnGround())
-        {
-            canDash = true;
-        }
+        float x = Input.GetAxis("Horizontal");
 
-
-        if (Input.GetKey(KeyCode.A) && Dscript.IsOnGround())
+        transform.Translate(new Vector3 (x * Time.deltaTime * 8, 0, 0));
+        isGrounded = Physics2D.OverlapCircle(groundCheck.position,.15f, mask);
+        if (Input.GetKeyDown(KeyCode.Space))
         {
-            rb.AddForce(new Vector2(-Time.deltaTime * speed, 0));
-        }
-        if (Input.GetKeyDown(KeyCode.A) && Dscript.IsOnGround() == false && canDash)
-        {
-            rb.velocity = Vector2.zero;
-            rb.AddForce(new Vector2(-dashForceSide, dashForceUp), ForceMode2D.Impulse);
-            canDash = false;
-        }
-
-
-        if (Input.GetKey(KeyCode.D) && Dscript.IsOnGround())
-        {
-            rb.AddForce(new Vector2(Time.deltaTime * speed, 0));
-        }
-        if (Input.GetKeyDown(KeyCode.D) && Dscript.IsOnGround() == false && canDash)
-        {
-            rb.velocity = Vector2.zero;
-            rb.AddForce(new Vector2(dashForceSide, dashForceUp), ForceMode2D.Impulse);
-            canDash = false;
-        }
-
-        if (Dscript.IsOnGround() && Input.GetKeyDown(KeyCode.Space))
-        {
-            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
-        }
-
-        if (Dscript.IsOnGround())
-        {
-            rb.drag = dragToRemember;
-        }
-        else
-        {
-            rb.drag = 0;
+            if (isGrounded)
+            {
+                rb.AddForce(new Vector2(0, 800));
+            }
         }
     }
 }
