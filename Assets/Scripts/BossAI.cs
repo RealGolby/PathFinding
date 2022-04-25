@@ -1,5 +1,5 @@
-using UnityEngine;
 using System.Collections;
+using UnityEngine;
 
 enum BossState
 {
@@ -32,6 +32,7 @@ public class BossAI : MonoBehaviour
     Rigidbody2D rb;
     SpriteRenderer sr;
     BoxCollider2D bc;
+    public Animator Anim;
 
     public float MaxBossHealth;
     public float BossHealth;
@@ -50,12 +51,11 @@ public class BossAI : MonoBehaviour
 
     HealthSystem playerHealth;
 
-    [SerializeField] Vector3 arenaCenter;
-    [SerializeField] Transform bossPosition;
+    public Vector3 ArenaCenter;
 
     void Start()
     {
-        BossHealth = MaxBossHealth;    
+        BossHealth = MaxBossHealth;
 
         bossPhase = BossPhase.First;
         bossState = BossState.Idle;
@@ -71,11 +71,11 @@ public class BossAI : MonoBehaviour
     }
     void Update()
     {
-        if (bossState != BossState.Dead  && bossPhase == BossPhase.First)
+        if (bossState != BossState.Dead && bossPhase == BossPhase.First)
         {
             updateBossFace();
         }
-        else if(bossState != BossState.Dead && bossPhase == BossPhase.Second)
+        else if (bossState != BossState.Dead && bossPhase == BossPhase.Second)
         {
             moveBossToCenter();
         }
@@ -83,10 +83,10 @@ public class BossAI : MonoBehaviour
 
     private void FixedUpdate()
     {
-        if(bossState != BossState.Dead)
+        if (bossState != BossState.Dead)
         {
             AttackPlayer();
-            if(bossPhase == BossPhase.First)
+            if (bossPhase == BossPhase.First)
             {
                 ChasePlayer();
             }
@@ -146,11 +146,11 @@ public class BossAI : MonoBehaviour
     void AttackPlayer()
     {
         bossDistance = Vector3.Distance(transform.position, Player.transform.position);
-        if (bossAttackDistance > bossDistance && bossState != BossState.Attack &&bossPhase == BossPhase.First)
+        if (bossAttackDistance > bossDistance && bossState != BossState.Attack && bossPhase == BossPhase.First)
         {
             StartCoroutine(AttackFirstPhase());
         }
-        else if(bossPhase == BossPhase.Second && bossState != BossState.Attack)
+        else if (bossPhase == BossPhase.Second && bossState != BossState.Attack)
         {
             StartCoroutine(AttackSecondPhase());
         }
@@ -158,7 +158,7 @@ public class BossAI : MonoBehaviour
 
     void moveBossToCenter()
     {
-        transform.position = Vector3.MoveTowards(transform.position, arenaCenter ,10* Time.deltaTime);
+        transform.position = Vector3.MoveTowards(transform.position, ArenaCenter, 10 * Time.deltaTime);
     }
 
     IEnumerator AttackFirstPhase()
@@ -166,11 +166,11 @@ public class BossAI : MonoBehaviour
         bossState = BossState.Attack;
         yield return new WaitForSeconds(Random.Range(1, 2));
 
-            Debug.Log("Attack player!");
-            playerHealth.Hchange(15);
-            TakeDamage(270);
-            yield return new WaitForSeconds(2f);
-            bossState = BossState.Idle;
+        Debug.Log("Attack player!");
+        playerHealth.Hchange(15);
+        TakeDamage(200);
+        yield return new WaitForSeconds(2f);
+        bossState = BossState.Idle;
     }
     #region SecondPhaseAttacks
 
@@ -178,9 +178,8 @@ public class BossAI : MonoBehaviour
     IEnumerator AttackSecondPhase()
     {
         bossState = BossState.Attack;
-        yield return new WaitForSeconds(Random.Range(1,3));
-        int attack = Random.Range(0,3);
-        
+        yield return new WaitForSeconds(Random.Range(1, 3));
+        int attack = Random.Range(0, 4);
         switch (attack.ToString())
         {
             case "0":
@@ -212,7 +211,7 @@ public class BossAI : MonoBehaviour
             Vector2 direction = difference / distance;
             direction.Normalize();
             GameObject projectile = Instantiate(singleProjectile, transform);
-            projectile.transform.position = arenaCenter;
+            projectile.transform.position = ArenaCenter;
             projectile.transform.rotation = Quaternion.Euler(0, 0, rotationZ);
             projectile.GetComponent<Rigidbody2D>().velocity = direction * singleProjectileSpeed;
             yield return new WaitForSeconds(singleTimeBetweenShots);
@@ -234,13 +233,12 @@ public class BossAI : MonoBehaviour
             float distance = difference.magnitude;
             Vector2 direction = difference / distance;
             direction.Normalize();
-            for (int x = -1; x < shotgunProjectilesPerShoot+1; x++)
+            for (int x = -1; x < shotgunProjectilesPerShoot - 1; x++)
             {
-                Debug.Log("SPawning shogun");
-                GameObject projectile = Instantiate(shotgunProjectile, transform);
-                projectile.transform.position = arenaCenter;
-                projectile.transform.rotation = Quaternion.Euler(0,0,rotationZ + x*30);
-                projectile.GetComponent<Rigidbody2D>().velocity = direction * shotgunProjectileSpeed;
+                GameObject projectileInstance = Instantiate(shotgunProjectile, transform);
+                projectileInstance.transform.position = ArenaCenter;
+                projectileInstance.transform.rotation = Quaternion.Euler(0, 0, rotationZ + x * 35);
+                projectileInstance.GetComponent<Rigidbody2D>().velocity = direction * shotgunProjectileSpeed;
             }
             yield return new WaitForSeconds(shotgunTimeBetweenShots);
         }
@@ -252,38 +250,63 @@ public class BossAI : MonoBehaviour
     [SerializeField] GameObject circleProjectile;
     IEnumerator SecondPhaseCircleAttack()
     {
-        int rndAngle = Random.Range(0,360);
+        int rndAngle = Random.Range(0, 360);
         for (int i = 0; i < circleProjectilesToShoot; i++)
         {
             float point = i / circleProjectilesToShoot;
             float angle = (point * Mathf.PI * 2);
             float x = Mathf.Sin(angle) * 1;
             float y = Mathf.Cos(angle) * 1;
-            Vector3 pos = new Vector3(x, y, 0) + arenaCenter;
-            GameObject projectile = Instantiate(circleProjectile,pos,Quaternion.Euler(0,0,-Mathf.Rad2Deg * angle + rndAngle));
+            Vector3 pos = new Vector3(x, y, 0) + ArenaCenter;
+            GameObject projectile = Instantiate(circleProjectile, pos, Quaternion.Euler(0, 0, -Mathf.Rad2Deg * angle + rndAngle));
         }
         yield return new WaitForSeconds(.5f);
         bossState = BossState.Idle;
     }
-
+    [Header("SecondPhaseLaserAttack")]
+    [SerializeField] GameObject laserProjectile;
+    public float LaserProjectileSpeed;
+    public float LaserProjectileIncreaseRate;
+    [SerializeField] float laserProjectileLiveTime;
     IEnumerator SecondPhaseLaserAttack()
     {
-        yield return new WaitForSeconds(1);
+        int rnd = Random.Range(0, 2);
+        GameObject laserInstance = Instantiate(laserProjectile, transform);
+        Laser laser = laserInstance.GetComponentInChildren<Laser>();
+        if (rnd == 0)
+        {
+            laserInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 0, 45));
+
+            laser.CanRotate = true;
+            laser.RotateClockwise = false;
+        }
+        else if (rnd == 1)
+        {
+            laserInstance.transform.rotation = Quaternion.Euler(new Vector3(0, 0, -45));
+            laser.CanRotate = true;
+            laser.RotateClockwise = true;
+        }
+        yield return new WaitForSeconds(laserProjectileLiveTime);
+        Destroy(laserInstance);
+        bossState = BossState.Idle;
     }
+
     #endregion
+
     void TakeDamage(int damageAmount)
     {
         BossHealth -= damageAmount;
         healthBar.transform.localScale = new Vector3((BossHealth / 100f) * 2f, .25f, 1f);
-        if(BossHealth <= MaxBossHealth / 2 && bossPhase == BossPhase.First)
+        if (BossHealth <= MaxBossHealth / 2 && bossPhase == BossPhase.First)
         {
             Debug.Log("Boss has entered second phase!");
+            Anim.SetBool("SecondPhase",true);
             rb.bodyType = RigidbodyType2D.Static;
             rb.gravityScale = 0;
             bossPhase = BossPhase.Second;
             bc.isTrigger = true;
             sr.color = Color.white;
-            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, 5, 0), 50* Time.deltaTime);
+            transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, 5, 0), 50 * Time.deltaTime);
         }
         if (BossHealth <= 0)
         {

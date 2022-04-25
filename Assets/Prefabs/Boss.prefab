@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 986297726811669150}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 12.02, y: 4.35, z: 0}
-  m_LocalScale: {x: 2, y: 3, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 1444975300075561603}
   - {fileID: 7891464249361691}
@@ -78,9 +78,9 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
-  m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 0, b: 0, a: 1}
+  m_SortingOrder: 1
+  m_Sprite: {fileID: 21300000, guid: 0f049c3c4a38b5d47baad1f6fa9bc7a6, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -109,8 +109,22 @@ MonoBehaviour:
   followDistance: 6
   bossAttackDistance: 3
   minBossDistance: 2.5
-  arenaCenter: {x: 0, y: 5, z: 0}
+  ArenaCenter: {x: 0, y: 7, z: 0}
   singleProjectile: {fileID: 7191089581305098782, guid: a899bf9977d95a746ba0f4419190d70a, type: 3}
+  singleProjectileSpeed: 12
+  singleTimeBetweenShots: 0.4
+  singleProjectilesToShoot: 8
+  shotgunProjectilesPerShoot: 3
+  shotgunProjectilesToShoot: 2
+  shotgunTimeBetweenShots: 1
+  shotgunProjectileSpeed: 7
+  shotgunProjectile: {fileID: 7453932858320328808, guid: b136d89c2ce8c3847b786417505dc200, type: 3}
+  circleProjectilesToShoot: 15
+  circleProjectile: {fileID: 7453932858320328808, guid: 3f878ddd230993345bb1a37be5f71fe3, type: 3}
+  laserProjectile: {fileID: 4259843768738278229, guid: c3567da31a355c641bd4b43ace51dc8c, type: 3}
+  LaserProjectileSpeed: 0.4
+  LaserProjectileIncreaseRate: 15
+  laserProjectileLiveTime: 2
 --- !u!61 &4163330062971664093
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -128,7 +142,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1, y: 1}
+    oldSize: {x: 9, y: 9}
     newSize: {x: 1, y: 1}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -229,7 +243,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
   m_Color: {r: 0.21698111, g: 0.21698111, b: 0.21698111, a: 1}
   m_FlipX: 0
@@ -312,7 +326,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0
@@ -395,7 +409,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: -2413806693520163455, guid: a86470a33a6bf42c4b3595704624658b, type: 3}
   m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_FlipX: 0

@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4664057380684125}
   - component: {fileID: 5735967125916219231}
   - component: {fileID: 4678787428890841469}
+  - component: {fileID: -1929492090410261975}
   m_Layer: 0
   m_Name: ShotgunProjectile
   m_TagString: Untagged
@@ -73,9 +74,9 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: -2413806693520163455, guid: 4adeaf2d2b1c7417e89f026626d8264f, type: 3}
-  m_Color: {r: 0.9254902, g: 0.16862741, b: 0.20020258, a: 1}
+  m_Color: {r: 0.16078432, g: 0.60784316, b: 0.8784314, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -120,3 +121,16 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
+--- !u!114 &-1929492090410261975
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7453932858320328808}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 336fb8e2991aa8641a4fb758fd54381c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  projectileDamage: 15
