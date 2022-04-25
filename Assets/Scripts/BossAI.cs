@@ -23,16 +23,16 @@ enum SecondPhaseAttacks
 
 public class BossAI : MonoBehaviour
 {
-    BossPhase bossPhase;
-    BossState bossState;
-    BossFace bossFace;
+    [SerializeField] BossPhase bossPhase;
+    [SerializeField] BossState bossState;
+    [SerializeField] BossFace bossFace;
 
     SecondPhaseAttacks secondPhaseAttacks;
 
     Rigidbody2D rb;
-    SpriteRenderer sr;
+    [SerializeField] SpriteRenderer spriteRenderer;
     BoxCollider2D bc;
-    public Animator Anim;
+    [SerializeField] Animator Anim;
 
     public float MaxBossHealth;
     public float BossHealth;
@@ -53,6 +53,8 @@ public class BossAI : MonoBehaviour
 
     public Vector3 ArenaCenter;
 
+    [SerializeField] Sprite secondPhaseSprite;
+
     void Start()
     {
         BossHealth = MaxBossHealth;
@@ -61,7 +63,6 @@ public class BossAI : MonoBehaviour
         bossState = BossState.Idle;
 
         rb = GetComponent<Rigidbody2D>();
-        sr = GetComponent<SpriteRenderer>();
         bc = GetComponent<BoxCollider2D>();
 
         Player = GameObject.Find("Player");
@@ -127,8 +128,8 @@ public class BossAI : MonoBehaviour
     }
     void updateBossFace()
     {
-        if (bossFace == BossFace.Right) sr.flipX = false;
-        else if (bossFace == BossFace.Left) sr.flipX = true;
+        if (bossFace == BossFace.Right) spriteRenderer.flipX = false;
+        else if (bossFace == BossFace.Left) spriteRenderer.flipX = true;
     }
 
     void setBossFace()
@@ -167,7 +168,7 @@ public class BossAI : MonoBehaviour
         yield return new WaitForSeconds(Random.Range(1, 2));
 
         Debug.Log("Attack player!");
-        playerHealth.Hchange(15);
+        playerHealth.TakeDamage(15);
         TakeDamage(200);
         yield return new WaitForSeconds(2f);
         bossState = BossState.Idle;
@@ -300,12 +301,13 @@ public class BossAI : MonoBehaviour
         if (BossHealth <= MaxBossHealth / 2 && bossPhase == BossPhase.First)
         {
             Debug.Log("Boss has entered second phase!");
+            Anim.transform.GetComponent<SpriteRenderer>().sprite = secondPhaseSprite;
+            Anim.transform.localPosition = Vector3.zero;
             Anim.SetBool("SecondPhase",true);
             rb.bodyType = RigidbodyType2D.Static;
             rb.gravityScale = 0;
             bossPhase = BossPhase.Second;
             bc.isTrigger = true;
-            sr.color = Color.white;
             transform.position = Vector3.MoveTowards(transform.position, new Vector3(0, 5, 0), 50 * Time.deltaTime);
         }
         if (BossHealth <= 0)

@@ -15,7 +15,7 @@ public class SingleProjectile : MonoBehaviour
     {
         if (collision.transform.CompareTag("Player"))
         {
-            collision.GetComponent<HealthSystem>().Hchange(projectileDamage);
+            FindObjectOfType<HealthSystem>().TakeDamage(projectileDamage);
             Destroy(gameObject);
         }
     }

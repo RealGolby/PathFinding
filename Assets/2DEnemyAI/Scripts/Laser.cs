@@ -5,10 +5,12 @@ public class Laser : MonoBehaviour
     BossAI bossAI;
     public bool RotateClockwise;
     public bool CanRotate;
+
+    [SerializeField] int laserDamage;
     private void Start()
     {
         bossAI = FindObjectOfType<BossAI>();
-        transform.parent.position = bossAI.ArenaCenter + new Vector3(0,1,0);
+        transform.parent.position = bossAI.ArenaCenter + new Vector3(0,1.8f,0);
 
 
     }
@@ -22,12 +24,20 @@ public class Laser : MonoBehaviour
 
         if (RotateClockwise && CanRotate)
         {
-            transform.parent.Rotate(new Vector3(0, 0, -bossAI.LaserProjectileSpeed));
+            transform.parent.Rotate(new Vector3(0, 0, -bossAI.LaserProjectileSpeed * Time.deltaTime));
         }
         else if(!RotateClockwise && CanRotate)
         {
-            transform.parent.Rotate(new Vector3(0, 0, bossAI.LaserProjectileSpeed));
+            transform.parent.Rotate(new Vector3(0, 0, bossAI.LaserProjectileSpeed * Time.deltaTime));
         }
+    }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.transform.CompareTag("Player"))
+        {
+            FindObjectOfType<HealthSystem>().TakeDamage(laserDamage);
+            GetComponent<BoxCollider2D>().enabled = false;
+        }
     }
 }

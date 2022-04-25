@@ -18,11 +18,11 @@ public class HealthTest : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.W))
         {
-            healthSystem.Hchange(-10);
+            healthSystem.TakeDamage(-10);
         }
         if (Input.GetKeyDown(KeyCode.S))
         {
-            healthSystem.Hchange(10);
+            healthSystem.TakeDamage(10);
         }
     }
 }

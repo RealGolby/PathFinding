@@ -300,7 +300,7 @@ public class EnemyAI : MonoBehaviour
                 rb.AddForce(new Vector2(-dashAttackJumpX, dashAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
-                playerHealth.Hchange(-enemyDamage);
+                playerHealth.TakeDamage(-enemyDamage);
                 TakeDamage(15);
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
@@ -314,7 +314,7 @@ public class EnemyAI : MonoBehaviour
                 rb.AddForce(new Vector2(dashAttackJumpX, dashAttackJumpY));
                 yield return new WaitForSeconds(.3f);
 
-                playerHealth.Hchange(-enemyDamage);
+                playerHealth.TakeDamage(-enemyDamage);
                 TakeDamage(15);
                 Debug.Log("Attack player!");
                 yield return new WaitForSeconds(.1f);
@@ -327,7 +327,7 @@ public class EnemyAI : MonoBehaviour
         else
         {
             Debug.Log("Attack player!");
-            playerHealth.Hchange(-enemyDamage);
+            playerHealth.TakeDamage(-enemyDamage);
             yield return new WaitForSeconds(2f);
             enemyState = EnemyState.Idle;
         }

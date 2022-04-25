@@ -19,7 +19,7 @@ public class HealthSystem : MonoBehaviour
         
     }
 
-    public void Hchange(int change)
+    public void TakeDamage(int change)
     {
         if (health<0)
         {
@@ -30,7 +30,7 @@ public class HealthSystem : MonoBehaviour
             health = 100;
         }
 
-        health += change;
+        health -= change;
         Scrollbar.size = health/100f;
         if(Scrollbar.size == 0)
         {
