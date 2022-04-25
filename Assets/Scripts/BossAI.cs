@@ -179,7 +179,7 @@ public class BossAI : MonoBehaviour
     {
         bossState = BossState.Attack;
         yield return new WaitForSeconds(Random.Range(1,3));
-        int attack = Random.Range(0,2);
+        int attack = Random.Range(0,3);
         
         switch (attack.ToString())
         {
@@ -219,17 +219,40 @@ public class BossAI : MonoBehaviour
         }
         bossState = BossState.Idle;
     }
-
+    [Header("SecondPhaseShotgunAttack")]
+    [SerializeField] int shotgunProjectilesPerShoot;
+    [SerializeField] int shotgunProjectilesToShoot;
+    [SerializeField] float shotgunTimeBetweenShots;
+    [SerializeField] float shotgunProjectileSpeed;
+    [SerializeField] GameObject shotgunProjectile;
     IEnumerator SecondPhaseShotgunAttack()
     {
-        yield return new WaitForSeconds(1);
+        for (int i = 0; i < shotgunProjectilesToShoot; i++)
+        {
+            Vector3 difference = Player.transform.position - transform.position;
+            float rotationZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
+            float distance = difference.magnitude;
+            Vector2 direction = difference / distance;
+            direction.Normalize();
+            for (int x = -1; x < shotgunProjectilesPerShoot+1; x++)
+            {
+                Debug.Log("SPawning shogun");
+                GameObject projectile = Instantiate(shotgunProjectile, transform);
+                projectile.transform.position = arenaCenter;
+                projectile.transform.rotation = Quaternion.Euler(0,0,rotationZ + x*30);
+                projectile.GetComponent<Rigidbody2D>().velocity = direction * shotgunProjectileSpeed;
+            }
+            yield return new WaitForSeconds(shotgunTimeBetweenShots);
+        }
+        bossState = BossState.Idle;
     }
 
     [Header("SecondPhaseCircleAttack")]
-    [SerializeField] float circleProjectilesToShoot;
+    [SerializeField] float circleProjectilesToShoot = 15;
     [SerializeField] GameObject circleProjectile;
     IEnumerator SecondPhaseCircleAttack()
     {
+        int rndAngle = Random.Range(0,360);
         for (int i = 0; i < circleProjectilesToShoot; i++)
         {
             float point = i / circleProjectilesToShoot;
@@ -237,7 +260,7 @@ public class BossAI : MonoBehaviour
             float x = Mathf.Sin(angle) * 1;
             float y = Mathf.Cos(angle) * 1;
             Vector3 pos = new Vector3(x, y, 0) + arenaCenter;
-            GameObject projectile = Instantiate(circleProjectile,pos,Quaternion.Euler(0,0,-Mathf.Rad2Deg * angle));
+            GameObject projectile = Instantiate(circleProjectile,pos,Quaternion.Euler(0,0,-Mathf.Rad2Deg * angle + rndAngle));
         }
         yield return new WaitForSeconds(.5f);
         bossState = BossState.Idle;
